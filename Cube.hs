@@ -41,6 +41,21 @@ module Cube where
 
     in apply xs c'
 
+  invert :: Move -> Move
+  invert U = U'
+  invert L = L'
+  invert R = R'
+  invert D = D'
+  invert B = B'
+  invert F = F'
+  invert U' = U
+  invert L' = L
+  invert R' = R
+  invert D' = D
+  invert B' = B
+  invert F' = F
+  invert x = x
+
   infixl 8 !>
   (!>) :: Int -> Permutation -> Int
   x !> p = (app p) ! x
@@ -60,6 +75,14 @@ module Cube where
   zero8,zero12 :: [Int]
   zero8 = replicate 8 0
   zero12 = replicate 12 0
+
+  moveOrientationEdge :: Orientation -> Move -> Orientation
+  moveOrientationEdge o m =
+    edgeO $ apply [m] (Cube (fromCycle 8 [[]]) (fromCycle 12 [[]]) (fromList zero8) o)
+
+  moveOrientationCorner :: Orientation -> Move -> Orientation
+  moveOrientationCorner o m =
+    cornerO $ apply [m] (Cube (fromCycle 8 [[]]) (fromCycle 12 [[]]) o (fromList zero12))
 
   move :: [Cycle] -> [Cycle] -> [Int] -> [Int] -> Cube -> Cube
   move pc' pe' o1' o2' x = Cube c e co eo where
