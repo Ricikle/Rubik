@@ -3,14 +3,15 @@ module Cube where
   import Data.Array
 
   data Move = U | U' | U2 | L | L' | L2 | R | R' | R2 | D | D' | D2 | B | B' | B2 | F | F' | F2 deriving Show
-
+  moves :: [Move]
+  moves = [U, U', U2, L, L', L2, R, R', R2, D, D', D2, B, B', B2, F, F', F2]
   identity :: Cube
   identity = Cube (fromCycle 8 []) (fromCycle 12 []) (fromList zero8) (fromList zero12)
 
   type Cycle = [Int]
   type SetSize = Int
   data Permutation = Permutation {maxNp :: SetSize, app :: Array Int Int} deriving Show
-  data Orientation = Orientation {maxNo :: SetSize, apo :: Array Int Int} deriving Show
+  data Orientation = Orientation {maxNo :: SetSize, apo :: Array Int Int} deriving (Show,Eq,Ord)
   data Cube = Cube {corner :: Permutation,
                     edges :: Permutation,
                     cornerO :: Orientation,
