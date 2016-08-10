@@ -1,6 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 module Stage2 where
+  import MapHelper
   import Cube
   import qualified Data.Map.Lazy as Map
   import qualified Data.Sequence as S
@@ -8,7 +9,7 @@ module Stage2 where
   import Control.Monad
 
   main :: IO ()
-  main = putStrLn "TODO"
+  main = writeTable "Stage2.dat" generateTable2
 
   movesStage2 :: [Move]
   movesStage2 = [U, U', U2, L2, R2, D, D', D2, B, B', B2, F, F', F2]
