@@ -2,7 +2,7 @@ module Cube where
 
   import Data.Array
 
-  data Move = U | U' | U2 | L | L' | L2 | R | R' | R2 | D | D' | D2 | B | B' | B2 | F | F' | F2 deriving Show
+  data Move = U | U' | U2 | L | L' | L2 | R | R' | R2 | D | D' | D2 | B | B' | B2 | F | F' | F2 deriving (Show,Read,Eq)
   moves :: [Move]
   moves = [U, U', U2, L, L', L2, R, R', R2, D, D', D2, B, B', B2, F, F', F2]
   identity :: Cube
@@ -69,6 +69,10 @@ module Cube where
 
   fromList :: [Int] -> Orientation
   fromList xs = let n = length xs in Orientation n $ listArray (1,n) xs
+
+  toListO :: Orientation -> [Int]
+  toListO (Orientation n arr) = [arr ! k | k <- [1..n]]
+
   join :: Permutation -> Permutation -> Permutation
   x1 `join` x2 = let n = maxNp x1 in Permutation n $ listArray (1,n) [k !> x1 !> x2 | k <-[1..n]]
 
