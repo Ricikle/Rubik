@@ -10,7 +10,7 @@ module Stage3 where
   import Data.Array
 
   main :: IO ()
-  main = writeTable "Stage3.dat" generateTable3
+  main = readTable "Stage3.dat" >>= putStrLn.show.Map.size
 
   movesStage3 :: [Move]
   movesStage3 = [U, U', U2, L2, R2, D, D', D2, B2, F2]
