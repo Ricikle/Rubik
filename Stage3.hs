@@ -5,8 +5,9 @@ module Stage3 where
   import MapHelper
   import qualified Data.Map.Lazy as Map
   import qualified Data.Sequence as S
-  import Control.Monad.State
+  import Control.Monad.Trans.State
   import Control.Monad
+  import Control.Monad.IO.Class
   import Data.Array
 
   main :: IO ()
@@ -24,9 +25,9 @@ module Stage3 where
   getStage3Arr :: Cube -> Arr
   getStage3Arr c = fromList ([arrEdge ! k | k <- toList (edges c)]++[arrCorner ! k | k <- toList (corner c)])
 
-  generateTable3 :: Table Arr
-  generateTable3 = execState (bfs (S.singleton identity)) Map.empty where
-    bfs :: S.Seq Cube -> State (Table Arr) ()
+  generateTable3 :: IO (Table Arr)
+  generateTable3 = execStateT (bfs (S.singleton identity)) Map.empty where
+    bfs :: S.Seq Cube -> StateT (Table Arr) IO ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do
       ys <- forM movesStage3 $ \m -> do
@@ -36,4 +37,6 @@ module Stage3 where
         if Map.member o ma
           then return []
           else modify ( Map.insert (o) (invert m)) >> return [c]
-      bfs (xs S.>< S.fromList (concat ys) )
+      let zs = xs S.>< S.fromList (concat ys)
+      liftIO . putStrLn . show . length $ zs
+      bfs (zs)
