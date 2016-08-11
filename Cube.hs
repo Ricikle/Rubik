@@ -10,12 +10,20 @@ module Cube where
 
   type Cycle = [Int]
   type SetSize = Int
-  data Permutation = Permutation {maxNp :: SetSize, app :: Array Int Int} deriving Show
-  data Orientation = Orientation {maxNo :: SetSize, apo :: Array Int Int} deriving (Show,Eq,Ord)
+  newtype Arr = Arr {getArr :: Array Int Int} deriving (Eq,Ord)
+  instance Show Arr where
+    show (Arr a) = show [a!k | k <- let (_,b) = bounds a in [1..b]]
+  instance Read Arr where
+    readsPrec _ str = let (l,rest):_  = ((readsPrec 0 str) ::[([Int],String)]) in [(Arr (listArray (1,length l) l),rest)]
+  type Permutation = Arr
+  type Orientation = Arr
   data Cube = Cube {corner :: Permutation,
                     edges :: Permutation,
                     cornerO :: Orientation,
                     edgeO :: Orientation } deriving (Show)
+
+  maxN :: Arr -> Int
+  maxN (Arr a) = snd $ bounds a
 
   apply :: [Move] -> Cube -> Cube
   apply [] c = c
@@ -58,26 +66,23 @@ module Cube where
 
   infixl 8 !>
   (!>) :: Int -> Permutation -> Int
-  x !> p = (app p) ! x
+  x !> (Arr p) = p ! x
 
   fromCycle :: SetSize -> [Cycle] -> Permutation
-  fromCycle n xss = Permutation n $ listArray (1,n) $ [searchCycles (xss) k | k <- [1..]] where
+  fromCycle n xss = Arr $ listArray (1,n) $ [searchCycles (xss) k | k <- [1..]] where
     searchCycles [] k = k
     searchCycles (ys:yss) k = let k' = searchOneCycle ys k (head ys) in if k' == k then searchCycles yss k else k'
     searchOneCycle [] k _ = k
     searchOneCycle (y:ys) k first = if y == k then if null ys then first else head ys else searchOneCycle ys k first
 
   fromList :: [Int] -> Orientation
-  fromList xs = let n = length xs in Orientation n $ listArray (1,n) xs
+  fromList xs = let n = length xs in Arr $ listArray (1,n) xs
 
-  toListO :: Orientation -> [Int]
-  toListO (Orientation n arr) = [arr ! k | k <- [1..n]]
-
-  toListP :: Permutation -> [Int]
-  toListP (Permutation n arr) = [arr ! k | k <- [1..n]]
+  toList :: Arr -> [Int]
+  toList arr = [getArr arr ! k | k <- [1..maxN arr]]
 
   join :: Permutation -> Permutation -> Permutation
-  x1 `join` x2 = let n = maxNp x1 in Permutation n $ listArray (1,n) [k !> x1 !> x2 | k <-[1..n]]
+  x1 `join` x2 = let n = maxN x1 in Arr $ listArray (1,n) [k !> x1 !> x2 | k <-[1..n]]
 
   zero8,zero12 :: [Int]
   zero8 = replicate 8 0
@@ -91,8 +96,8 @@ module Cube where
     o2 = fromList o2'
     c = corner x `join` pc
     e = edges x `join` pe
-    co = Orientation 8 $ array (1,8) [(k !> pc , ((apo (cornerO x)) ! k + (apo o1) ! k) `mod` 3) | k <- [1..8]]
-    eo = Orientation 12 $ array (1,12) [(k !> pe , ((apo (edgeO x)) ! k + (apo o2) ! k) `mod` 2)  | k <- [1..12]]
+    co = Arr $ array (1,8) [(k !> pc , (getArr (cornerO x) ! k + getArr o1 ! k) `mod` 3) | k <- [1..8]]
+    eo = Arr $ array (1,12) [(k !> pe , (getArr (edgeO x) ! k + getArr o2 ! k) `mod` 2)  | k <- [1..12]]
 
   u,u',u2,d,d',d2,f,f',f2,b,b',b2,l,l',l2,r,r',r2 :: Cube -> Cube
   u = move [[1,2,3,4]] [[1,2,3,4]] zero8 zero12

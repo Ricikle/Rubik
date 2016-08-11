@@ -14,15 +14,15 @@ module Stage2 where
   movesStage2 :: [Move]
   movesStage2 = [U, U', U2, L2, R2, D, D', D2, B, B', B2, F, F', F2]
 
-  getMoveListCorner :: Table -> Cube -> (Cube,[Move])
+  getMoveListCorner :: Table Orientation -> Cube -> (Cube,[Move])
   getMoveListCorner ma c = if cornerO c == fromList zero8
     then (c,[]) else let m = ma Map.! cornerO c
                          (a,b) = getMoveListCorner ma (apply [m] c)
                      in (a,m:b)
 
-  generateTable2 :: Table
+  generateTable2 :: Table Orientation
   generateTable2 = execState (bfs (S.singleton identity)) Map.empty where
-    bfs :: S.Seq Cube -> State Table ()
+    bfs :: S.Seq Cube -> State (Table Orientation) ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do
       ys <- forM movesStage2 $ \m -> do

@@ -13,16 +13,16 @@ module Stage1 where
     x <- readTable "Stage1.dat"
     putStrLn $ show $ x == generateTable1
 
-  getMoveListEdge :: Table -> Cube -> (Cube,[Move])
+  getMoveListEdge :: Table Orientation -> Cube -> (Cube,[Move])
   getMoveListEdge ma c = if edgeO c == fromList zero12
     then (c,[]) else let m = ma Map.! edgeO c
                          (a,b) = getMoveListEdge ma (apply [m] c)
                      in (a,m:b)
 
 
-  generateTable1 :: Table
+  generateTable1 :: Table Orientation
   generateTable1 = execState (bfs (S.singleton identity)) Map.empty where
-    bfs :: S.Seq Cube -> State Table ()
+    bfs :: S.Seq Cube -> State (Table Orientation) ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do
       ys <- forM moves $ \m -> do

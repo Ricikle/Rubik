@@ -10,7 +10,7 @@ module Stage3 where
   import Data.Array
 
   main :: IO ()
-  main = readTable "Stage3.dat" >>= putStrLn.show.Map.size
+  main = ((readTable "Stage3.dat") :: IO(Table Arr)) >>= putStrLn.show.Map.size
 
   movesStage3 :: [Move]
   movesStage3 = [U, U', U2, L2, R2, D, D', D2, B2, F2]
@@ -21,18 +21,18 @@ module Stage3 where
   arrCorner :: Array Int Int
   arrCorner = listArray (1,8) [1,2,1,2,2,1,2,1]
 
-  getStage3Orientation :: Cube -> Orientation
-  getStage3Orientation c = fromList ([arrEdge ! k | k <- toListP (edges c)]++[arrCorner ! k | k <- toListP (corner c)])
+  getStage3Arr :: Cube -> Arr
+  getStage3Arr c = fromList ([arrEdge ! k | k <- toList (edges c)]++[arrCorner ! k | k <- toList (corner c)])
 
-  generateTable3 :: Table
+  generateTable3 :: Table Arr
   generateTable3 = execState (bfs (S.singleton identity)) Map.empty where
-    bfs :: S.Seq Cube -> State Table ()
+    bfs :: S.Seq Cube -> State (Table Arr) ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do
       ys <- forM movesStage3 $ \m -> do
         let c = apply [m] x
         ma <- get
-        let o = getStage3Orientation c
+        let o = getStage3Arr c
         if Map.member o ma
           then return []
           else modify ( Map.insert (o) (invert m)) >> return [c]
