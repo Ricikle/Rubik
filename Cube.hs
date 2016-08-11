@@ -73,20 +73,15 @@ module Cube where
   toListO :: Orientation -> [Int]
   toListO (Orientation n arr) = [arr ! k | k <- [1..n]]
 
+  toListP :: Permutation -> [Int]
+  toListP (Permutation n arr) = [arr ! k | k <- [1..n]]
+
   join :: Permutation -> Permutation -> Permutation
   x1 `join` x2 = let n = maxNp x1 in Permutation n $ listArray (1,n) [k !> x1 !> x2 | k <-[1..n]]
 
   zero8,zero12 :: [Int]
   zero8 = replicate 8 0
   zero12 = replicate 12 0
-
-  moveOrientationEdge :: Orientation -> Move -> Orientation
-  moveOrientationEdge o m =
-    edgeO $ apply [m] (Cube (fromCycle 8 [[]]) (fromCycle 12 [[]]) (fromList zero8) o)
-
-  moveOrientationCorner :: Orientation -> Move -> Orientation
-  moveOrientationCorner o m =
-    cornerO $ apply [m] (Cube (fromCycle 8 [[]]) (fromCycle 12 [[]]) o (fromList zero12))
 
   move :: [Cycle] -> [Cycle] -> [Int] -> [Int] -> Cube -> Cube
   move pc' pe' o1' o2' x = Cube c e co eo where

@@ -11,12 +11,18 @@ module Stage1 where
   main :: IO ()
   main = do
     x <- readTable "Stage1.dat"
-    putStrLn $ show $ x == generateTable
+    putStrLn $ show $ x == generateTable1
+
+  getMoveListEdge :: Table -> Cube -> (Cube,[Move])
+  getMoveListEdge ma c = if edgeO c == fromList zero12
+    then (c,[]) else let m = ma Map.! edgeO c
+                         (a,b) = getMoveListEdge ma (apply [m] c)
+                     in (a,m:b)
 
 
   generateTable1 :: Table
-  generateTable = execState (bfs (S.singleton identity)) Map.empty where
-    bfs :: S.Seq Cube -> State (Table) ()
+  generateTable1 = execState (bfs (S.singleton identity)) Map.empty where
+    bfs :: S.Seq Cube -> State Table ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do
       ys <- forM moves $ \m -> do

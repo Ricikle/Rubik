@@ -3,11 +3,7 @@ module MapHelper where
   import qualified Data.Map.Lazy as Map
 
   type Table = Map.Map Orientation Move
-
-  getMoveList :: Table -> Orientation -> [Move]
-  getMoveList ma o = if o == fromList (replicate (maxNo o) 0)
-    then [] else let m = ma Map.! o in m : getMoveList ma (moveOrientationEdge o m)
-
+  
   writeTable :: FilePath -> Table ->  IO ()
   writeTable fp t = writeFile fp $ Map.foldrWithKey f "" t where
     f k a b = show (toListO k) ++ ' ' : show a ++  '\n' : b
