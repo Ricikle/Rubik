@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-module Stage3 where
+module Stage3 (writeTable) where
   import Cube
   import MapHelper
   import qualified Data.Map.Lazy as Map
@@ -25,8 +25,12 @@ module Stage3 where
   getStage3Arr :: Cube -> Arr
   getStage3Arr c = fromList ([arrEdge ! k | k <- toList (edges c)]++[arrCorner ! k | k <- toList (corner c)])
 
-  generateTable3 :: IO (Table Arr)
-  generateTable3 = execStateT (bfs (S.singleton identity)) Map.empty where
+  writeTable :: IO ()
+  writeTable = generateTable >>=
+    writeTableToFile "Stage3.dat"
+
+  generateTable :: IO (Table Arr)
+  generateTable = execStateT (bfs (S.singleton identity)) Map.empty where
     bfs :: S.Seq Cube -> StateT (Table Arr) IO ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do

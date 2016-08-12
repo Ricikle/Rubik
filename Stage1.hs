@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-module Stage1 where
+module Stage1(writeTable,getMoveList)where
   import Cube
   import MapHelper
   import qualified Data.Map.Lazy as Map
@@ -9,21 +9,21 @@ module Stage1 where
   import Control.Monad.Trans.State
   import Control.Monad.IO.Class
 
-  main :: IO ()
-  main = do
-    x <- readTable "Stage1.dat"
-    y <- generateTable1
-    putStrLn $ show $ x == y
+  getMoveList :: Cube -> IO (Cube,[Move])
+  getMoveList c' = do
+    ma' <- readTable "Stage1.dat"
+    return $ getMoves ma' c' where
+      getMoves ma c = if edgeO c == fromList zero12
+        then (c,[]) else let m = ma Map.! edgeO c
+                             (a,b) = getMoves ma (apply [m] c)
+                         in (a,m:b)
 
-  getMoveListEdge :: Table Orientation -> Cube -> (Cube,[Move])
-  getMoveListEdge ma c = if edgeO c == fromList zero12
-    then (c,[]) else let m = ma Map.! edgeO c
-                         (a,b) = getMoveListEdge ma (apply [m] c)
-                     in (a,m:b)
+  writeTable :: IO ()
+  writeTable = generateTable >>=
+    writeTableToFile "Stage1.dat"
 
-
-  generateTable1 :: IO (Table Orientation)
-  generateTable1 = execStateT (bfs (S.singleton identity)) Map.empty where
+  generateTable :: IO (Table Orientation)
+  generateTable = execStateT (bfs (S.singleton identity)) Map.empty where
     bfs :: S.Seq Cube -> StateT (Table Orientation) IO ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do

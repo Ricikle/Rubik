@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-module Stage2 where
+module Stage2 (getMoveList,writeTable) where
   import MapHelper
   import Cube
   import qualified Data.Map.Lazy as Map
@@ -9,11 +9,12 @@ module Stage2 where
   import Control.Monad
   import Control.Monad.IO.Class
 
-  main :: IO ()
-  main = generateTable2 >>= \t -> writeTable "Stage2.dat" t
-
   movesStage2 :: [Move]
   movesStage2 = [U, U', U2, L2, R2, D, D', D2, B, B', B2, F, F', F2]
+
+  getMoveList :: Cube -> IO (Cube,[Move])
+  getMoveList c = readTable "Stage2.dat" >>= \t ->
+    return $ getMoveListCorner t c
 
   getMoveListCorner :: Table Orientation -> Cube -> (Cube,[Move])
   getMoveListCorner ma c = if cornerO c == fromList zero8
@@ -21,8 +22,12 @@ module Stage2 where
                          (a,b) = getMoveListCorner ma (apply [m] c)
                      in (a,m:b)
 
-  generateTable2 :: IO (Table Orientation)
-  generateTable2 = execStateT (bfs (S.singleton identity)) Map.empty where
+  writeTable :: IO ()
+  writeTable = generateTable >>=
+    writeTableToFile "Stage2.dat"
+
+  generateTable :: IO (Table Orientation)
+  generateTable = execStateT (bfs (S.singleton identity)) Map.empty where
     bfs :: S.Seq Cube -> StateT (Table Orientation) IO ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do

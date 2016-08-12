@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-module Stage4 where
+module Stage4 (writeTable) where
   import Cube
   import MapHelper
   import qualified Data.Map.Lazy as Map
@@ -13,9 +13,6 @@ module Stage4 where
   import Data.Word
 
   type BitArr = Int
-
-  main :: IO ()
-  main = generateTable4 >>= \t -> writeTable "Stage4.dat" t
 
   movesStage4 :: [Move]
   movesStage4 = [U2, L2, R2, D2, B2, F2]
@@ -51,8 +48,12 @@ module Stage4 where
                       in sum ([shift ((if testBit b (2*k-1) then 2 else 0) + (if testBit b (2*k-2) then 1 else 0)) (2*((k !> edges (adaptedMoves ! i)) - 1))| k <- [1..12]]
                         ++ [shift ((if testBit b (2*k+23) then 2 else 0) + (if testBit b (2*k+22) then 1 else 0)) (2*((k !> corner (adaptedMoves ! i)) + 11)) | k <- [1..8]])
 
-  generateTable4 :: IO (Table BitArr)
-  generateTable4 = execStateT (bfs (S.singleton (toBitArr identity))) Map.empty where
+  writeTable :: IO ()
+  writeTable = generateTable >>=
+    writeTableToFile "Stage4.dat"
+
+  generateTable :: IO (Table BitArr)
+  generateTable = execStateT (bfs (S.singleton (toBitArr identity))) Map.empty where
     bfs :: S.Seq BitArr -> StateT (Table BitArr) IO ()
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do

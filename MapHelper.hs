@@ -4,8 +4,8 @@ module MapHelper where
 
   type Table a = Map.Map a Move
 
-  writeTable :: (Show a) => FilePath -> Table a ->  IO ()
-  writeTable fp t = writeFile fp $ Map.foldrWithKey f "" t where
+  writeTableToFile :: (Show a) => FilePath -> Table a ->  IO ()
+  writeTableToFile fp t = writeFile fp $ Map.foldrWithKey f "" t where
     f k a b = show k ++ ' ' : show a ++  '\n' : b
 
   readTable :: (Read a, Ord a) => FilePath -> IO (Table a)
