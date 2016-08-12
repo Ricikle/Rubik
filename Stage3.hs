@@ -37,17 +37,21 @@ module Stage3 (writeTable,getMoveList) where
     writeTableToFile "Stage3.dat"
 
   generateTable :: IO (Table Arr)
-  generateTable = execStateT (bfs (S.singleton identity)) Map.empty where
-    bfs :: S.Seq Cube -> StateT (Table Arr) IO ()
-    bfs (S.viewl -> S.EmptyL) = return ()
-    bfs (S.viewl -> (x S.:< xs)) = do
-      ys <- forM movesStage3 $ \m -> do
-        let c = apply [m] x
-        ma <- get
-        let o = getStage3Arr c
-        if Map.member o ma
-          then return []
-          else modify ( Map.insert (o) (invert m)) >> return [c]
-      let zs = xs S.>< S.fromList (concat ys)
-      liftIO . putStrLn . show . length $ zs
-      bfs (zs)
+  generateTable = do
+    putStr "          Objects in Queue"
+    t <- execStateT (bfs (S.singleton identity)) Map.empty
+    putStrLn "\rFinished writing Stage 3  "
+    return t where
+      bfs :: S.Seq Cube -> StateT (Table Arr) IO ()
+      bfs (S.viewl -> S.EmptyL) = return ()
+      bfs (S.viewl -> (x S.:< xs)) = do
+        ys <- forM movesStage3 $ \m -> do
+          let c = apply [m] x
+          ma <- get
+          let o = getStage3Arr c
+          if Map.member o ma
+            then return []
+            else modify ( Map.insert (o) (invert m)) >> return [c]
+        let zs = xs S.>< S.fromList (concat ys)
+        liftIO . putStr $ '\r' : (show . length $ zs)
+        bfs (zs)
