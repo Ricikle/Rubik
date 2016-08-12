@@ -12,7 +12,7 @@ module Stage4 where
   import Data.Array
   import Data.Word
 
-  type BitArr = Word64
+  type BitArr = Int
 
   main :: IO ()
   main = generateTable4 >>= \t -> writeTable "Stage4.dat" t
@@ -27,7 +27,7 @@ module Stage4 where
   toBitArr c = toBits $ map f (toList (edges c)) ++ map g (toList (corner c)) where
     toBits :: [Int] -> BitArr
     toBits [] = 0
-    toBits (x:xs) = fromIntegral x + shift (toBits xs) 1
+    toBits (x:xs) = fromIntegral x + shift (toBits xs) 2
     f 1 = 0
     f 2 = 0
     f 3 = 1
@@ -48,8 +48,8 @@ module Stage4 where
                             D2 -> 4
                             B2 -> 5
                             F2 -> 6
-                      in sum ([shift (if testBit b (2*k-1) then 2 else 0 + if testBit b (2*k-2) then 1 else 0) (k !> edges (adaptedMoves ! i) - 1)| k <- [1..12]]
-                        ++ [shift (if testBit b (2*k+23) then 2 else 0 + if testBit b (2*k+22) then 1 else 0) (k !> corner (adaptedMoves ! i) + 11) | k <- [1..8]])
+                      in sum ([shift ((if testBit b (2*k-1) then 2 else 0) + (if testBit b (2*k-2) then 1 else 0)) (2*((k !> edges (adaptedMoves ! i)) - 1))| k <- [1..12]]
+                        ++ [shift ((if testBit b (2*k+23) then 2 else 0) + (if testBit b (2*k+22) then 1 else 0)) (2*((k !> corner (adaptedMoves ! i)) + 11)) | k <- [1..8]])
 
   generateTable4 :: IO (Table BitArr)
   generateTable4 = execStateT (bfs (S.singleton (toBitArr identity))) Map.empty where
