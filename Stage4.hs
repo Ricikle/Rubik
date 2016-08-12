@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-module Stage4 (writeTable) where
+module Stage4 (writeTable,getMoveList) where
   import Cube
   import MapHelper
   import qualified Data.Map.Lazy as Map
@@ -12,13 +12,22 @@ module Stage4 (writeTable) where
   import Data.Array
   import Data.Word
 
-  type BitArr = Int
+  type BitArr = Word64
 
   movesStage4 :: [Move]
   movesStage4 = [U2, L2, R2, D2, B2, F2]
 
   adaptedMoves :: Array Int Cube
   adaptedMoves = listArray (1,6) $ map (\f -> f identity) [u2,l2,r2,d2,b2,f2]
+
+  getMoveList :: Cube -> IO [Move]
+  getMoveList c = readTable "Stage4.dat" >>= \t ->
+    return $ getMoveListStage4 t (toBitArr c)
+
+  getMoveListStage4 :: Table BitArr -> BitArr -> [Move]
+  getMoveListStage4 ma b = if b == toBitArr identity
+    then [] else let m = ma Map.! b
+                 in m : getMoveListStage4 ma (applyBitArr b m)
 
   toBitArr :: Cube -> BitArr
   toBitArr c = toBits $ map f (toList (edges c)) ++ map g (toList (corner c)) where
@@ -37,8 +46,8 @@ module Stage4 (writeTable) where
     g x = (x-1) `div` 2
 
 
-  applyBitArray :: BitArr -> Move -> BitArr
-  applyBitArray b m = let i = case m of
+  applyBitArr :: BitArr -> Move -> BitArr
+  applyBitArr b m = let i = case m of
                             U2 -> 1
                             L2 -> 2
                             R2 -> 3
@@ -58,7 +67,7 @@ module Stage4 (writeTable) where
     bfs (S.viewl -> S.EmptyL) = return ()
     bfs (S.viewl -> (x S.:< xs)) = do
       ys <- forM movesStage4 $ \m -> do
-        let c = applyBitArray x m
+        let c = applyBitArr x m
         ma <- get
         if Map.member c ma
           then return []

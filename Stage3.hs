@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-module Stage3 (writeTable) where
+module Stage3 (writeTable,getMoveList) where
   import Cube
   import MapHelper
   import qualified Data.Map.Lazy as Map
@@ -10,11 +10,18 @@ module Stage3 (writeTable) where
   import Control.Monad.IO.Class
   import Data.Array
 
-  main :: IO ()
-  main = ((readTable "Stage3.dat") :: IO(Table Arr)) >>= putStrLn.show.Map.size
-
   movesStage3 :: [Move]
   movesStage3 = [U, U', U2, L2, R2, D, D', D2, B2, F2]
+
+  getMoveList :: Cube -> IO (Cube,[Move])
+  getMoveList c = readTable "Stage3.dat" >>= \t ->
+    return $ getMoveListStage3 t c
+
+  getMoveListStage3 :: Table Arr -> Cube -> (Cube,[Move])
+  getMoveListStage3 ma c = if getStage3Arr c == getStage3Arr identity
+    then (c,[]) else let m = ma Map.! getStage3Arr c
+                         (a,b) = getMoveListStage3 ma (apply [m] c)
+                     in (a,m:b)
 
   arrEdge :: Array Int Int
   arrEdge = listArray (1,12) [1,2,1,2,1,2,1,2,3,3,3,3]
