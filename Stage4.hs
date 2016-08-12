@@ -62,16 +62,20 @@ module Stage4 (writeTable,getMoveList) where
     writeTableToFile "Stage4.dat"
 
   generateTable :: IO (Table BitArr)
-  generateTable = execStateT (bfs (S.singleton (toBitArr identity))) Map.empty where
-    bfs :: S.Seq BitArr -> StateT (Table BitArr) IO ()
-    bfs (S.viewl -> S.EmptyL) = return ()
-    bfs (S.viewl -> (x S.:< xs)) = do
-      ys <- forM movesStage4 $ \m -> do
-        let c = applyBitArr x m
-        ma <- get
-        if Map.member c ma
-          then return []
-          else modify ( Map.insert c (invert m)) >> return [c]
-      let zs = xs S.>< S.fromList (concat ys)
-      liftIO . putStrLn . show . length $ zs
-      bfs (zs)
+  generateTable = do
+    putStr "          Objects in Queue"
+    t <- execStateT (bfs (S.singleton (toBitArr identity))) Map.empty
+    putStrLn "\rFinished writing Stage 4  "
+    return t where
+      bfs :: S.Seq BitArr -> StateT (Table BitArr) IO ()
+      bfs (S.viewl -> S.EmptyL) = return ()
+      bfs (S.viewl -> (x S.:< xs)) = do
+        ys <- forM movesStage4 $ \m -> do
+          let c = applyBitArr x m
+          ma <- get
+          if Map.member c ma
+            then return []
+            else modify ( Map.insert c (invert m)) >> return [c]
+        let zs = xs S.>< S.fromList (concat ys)
+        liftIO . putStr $ '\r' : (show . length $ zs)
+        bfs (zs)

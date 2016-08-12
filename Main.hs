@@ -20,10 +20,10 @@ module Main where
   main :: IO ()
   main = do
     s1 <- checkFile "Stage1.dat"
-    s2 <- checkFile "Stage2.dat"
-    s3 <- checkFile "Stage3.dat"
-    s4 <- checkFile "Stage4.dat"
     if s1 then return () else putStrLn "Writing Table for Stage 1" >> Stage1.writeTable
-    if s2 then return () else putStrLn "Writing Table for Stage 2" >> Stage2.writeTable 
+    s2 <- checkFile "Stage2.dat"
+    if s2 then return () else putStrLn "Writing Table for Stage 2" >> Stage2.writeTable
+    s3 <- checkFile "Stage3.dat"
     if s3 then return () else putStrLn "Writing Table for Stage 3" >> Stage3.writeTable
+    s4 <- checkFile "Stage4.dat"
     if s4 then return () else putStrLn "Writing Table for Stage 4" >> Stage4.writeTable

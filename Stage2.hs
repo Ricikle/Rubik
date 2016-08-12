@@ -27,16 +27,20 @@ module Stage2 (getMoveList,writeTable) where
     writeTableToFile "Stage2.dat"
 
   generateTable :: IO (Table Orientation)
-  generateTable = execStateT (bfs (S.singleton identity)) Map.empty where
-    bfs :: S.Seq Cube -> StateT (Table Orientation) IO ()
-    bfs (S.viewl -> S.EmptyL) = return ()
-    bfs (S.viewl -> (x S.:< xs)) = do
-      ys <- forM movesStage2 $ \m -> do
-        let c = apply [m] x
-        ma <- get
-        if Map.member (cornerO c) ma
-          then return []
-          else modify ( Map.insert (cornerO c) (invert m)) >> return [c]
-      let zs = xs S.>< S.fromList (concat ys)
-      liftIO . putStrLn . show . length $ zs
-      bfs (zs)
+  generateTable = do
+    putStr "          Objects in Queue"
+    t <- execStateT (bfs (S.singleton identity)) Map.empty
+    putStrLn "\rFinished writing Stage 2  "
+    return t where
+      bfs :: S.Seq Cube -> StateT (Table Orientation) IO ()
+      bfs (S.viewl -> S.EmptyL) = return ()
+      bfs (S.viewl -> (x S.:< xs)) = do
+        ys <- forM movesStage2 $ \m -> do
+          let c = apply [m] x
+          ma <- get
+          if Map.member (cornerO c) ma
+            then return []
+            else modify ( Map.insert (cornerO c) (invert m)) >> return [c]
+        let zs = xs S.>< S.fromList (concat ys)
+        liftIO . putStr $ '\r' : (show . length $ zs)
+        bfs (zs)
