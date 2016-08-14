@@ -1,9 +1,11 @@
 module Main where
   import System.Directory
+  import Cube
   import qualified Stage1 as Stage1
   import qualified Stage2 as Stage2
   import qualified Stage3 as Stage3
   import qualified Stage4 as Stage4
+  import qualified CubeReader as Reader
 
 
   checkFile :: FilePath -> IO Bool
@@ -27,3 +29,5 @@ module Main where
     if s3 then return () else putStrLn "Writing Table for Stage 3" >> Stage3.writeTable
     s4 <- checkFile "Stage4.dat"
     if s4 then return () else putStrLn "Writing Table for Stage 4" >> Stage4.writeTable
+    cube <- Reader.readCube
+    putStrLn $ show cube
