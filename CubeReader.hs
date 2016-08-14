@@ -3,6 +3,7 @@ module CubeReader (readCube) where
   import Control.Monad
   import Data.List
   import Data.Array
+  import Data.Char
   import qualified Data.Map.Lazy as Map
 
   data Colour = W | Y | B | G | R | O deriving (Show,Read,Eq,Ord,Ix)
@@ -12,7 +13,7 @@ module CubeReader (readCube) where
   (Face f) !!! i = f ! i
 
   instance Ord Face where
-    f1 <= f2 = f1 !!! 5 <= f2 !!! 5 
+    f1 <= f2 = f1 !!! 5 <= f2 !!! 5
 
   data CornerPiece = Corner {rotationc :: Int,piecec :: Int}
 
@@ -44,7 +45,7 @@ module CubeReader (readCube) where
   readCube:: IO (Cube.Cube)
   readCube = do
     putStrLn "Enter faces of cube (red towards and yellow facing upwards)"
-    faces <- sequence (replicate 6 getLine)
+    faces <- sequence (replicate 6 (liftM (map toUpper) getLine))
     let sorted = listArray (W,O) $ sort $ map toFace faces
         cornerList = map toCorner [
           (sorted ! Y !!! 9, sorted ! G !!! 1, sorted ! R !!! 3),
