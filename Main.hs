@@ -1,10 +1,10 @@
 module Main where
   import System.Directory
   import Cube
-  import qualified Stage1 as Stage1
-  import qualified Stage2 as Stage2
-  import qualified Stage3 as Stage3
-  import qualified Stage4 as Stage4
+  import qualified Stage1
+  import qualified Stage2
+  import qualified Stage3
+  import qualified Stage4
   import qualified CubeReader as Reader
 
 
