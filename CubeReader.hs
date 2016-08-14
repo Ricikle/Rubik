@@ -1,12 +1,12 @@
 module CubeReader (readCube) where
-  import qualified Cube as Cube
+  import qualified Cube
   import Control.Monad
   import Data.List
   import Data.Array
   import Data.Char
   import qualified Data.Map.Lazy as Map
 
-  data Colour = W | Y | B | G | R | O deriving (Show,Read,Eq,Ord,Ix)
+  data Colour = O | R | B | G | Y | W deriving (Show,Read,Eq,Ord,Ix)
   newtype Face = Face (Array Int Colour) deriving (Show,Eq)
 
   (!!!) :: Face -> Int -> Colour
@@ -21,14 +21,16 @@ module CubeReader (readCube) where
 
   cornerPieces :: Map.Map (Colour,Colour,Colour) Int
   cornerPieces = Map.fromList [((Y,G,R),1),((Y,B,R),2),((Y,B,O),3),
-    ((Y,G,O),4),((W,G,R),5),((W,G,O),6),((Y,B,O),7),((W,B,R),8)]
+    ((Y,G,O),4),((W,G,R),5),((W,G,O),6),((W,B,O),7),((W,B,R),8)]
   edgePieces :: Map.Map (Colour,Colour) Int
   edgePieces = Map.fromList [((Y,R),1),((Y,B),2),((Y,O),3),((Y,G),4),((W,R),5),((W,G),6),
     ((W,O),7),((W,B),8),((B,O),9),((B,R),10),((G,R),11),((G,O),12)]
 
 
   toFace :: String -> Face
-  toFace xs = Face $ listArray (1,9) $ map read (words xs)
+  toFace xs = Face $ listArray (1,9) $ map read (letters xs) where
+    letters (x:xs) = (x:[]) : letters xs
+    letters [] = []
 
   toCorner :: (Colour, Colour, Colour) -> CornerPiece
   toCorner (first, second, third) = case biggest of
@@ -46,12 +48,12 @@ module CubeReader (readCube) where
   readCube = do
     putStrLn "Enter faces of cube (red towards and yellow facing upwards)"
     faces <- sequence (replicate 6 (liftM (map toUpper) getLine))
-    let sorted = listArray (W,O) $ sort $ map toFace faces
+    let sorted = listArray (O,W) $ sort $ map toFace faces
         cornerList = map toCorner [
           (sorted ! Y !!! 9, sorted ! G !!! 1, sorted ! R !!! 3),
           (sorted ! Y !!! 7, sorted ! R !!! 1, sorted ! B !!! 3),
           (sorted ! Y !!! 1, sorted ! B !!! 1, sorted ! O !!! 3),
-          (sorted ! Y !!! 3, sorted ! G !!! 3, sorted ! O !!! 1),
+          (sorted ! Y !!! 3, sorted ! O !!! 1, sorted ! G !!! 3),
           (sorted ! W !!! 3, sorted ! R !!! 9, sorted ! G !!! 7),
           (sorted ! W !!! 9, sorted ! G !!! 9, sorted ! O !!! 7),
           (sorted ! W !!! 7, sorted ! O !!! 9, sorted ! B !!! 7),
